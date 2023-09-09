@@ -1,0 +1,19 @@
+name: parsldockenv
+channels:
+   - defaults
+   - conda-forge
+   - bioconda
+dependencies:
+   - python=3.10
+   - pip
+
+   - autodock-vina
+   - mgltools
+   - vmd
+
+   - pip:
+      - rdkit
+      - scikit-learn
+      - pandas
+      - matplotlib
+      - parsl
