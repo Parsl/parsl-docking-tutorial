@@ -3,8 +3,7 @@ RUN apt update -y
 RUN apt install wget build-essential libglu1 git vim -y
 RUN conda install -c anaconda jupyter -y
 RUN conda install nb_conda_kernels -y
-RUN conda update -c bioconda --all
-COPY  docker/environment.yml .
-RUN conda env create --file environment.yml
+COPY . /parsldock
+WORKDIR /parsldock
+RUN conda env create --file docker/environment.yml
 RUN conda update -c defaults jupyter -y
-RUN git clone https://github.com/Parsl/parsl-docking-tutorial

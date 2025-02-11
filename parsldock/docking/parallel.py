@@ -37,11 +37,15 @@ def parsl_pdb_to_pdbqt(
         else ('prepare_receptor4.py', 'r')
     )
 
+    script_path = (
+        Path(autodocktools_path)
+        / 'MGLToolsPckgs/AutoDockTools/Utilities24'
+        / script
+    )
+
     command = (
         f"{'python2.7'}"
-        f" {(Path(autodocktools_path)
-            / 'MGLToolsPckgs/AutoDockTools/Utilities24'
-            / script)}"
+        f" {script_path}"
         f" -{flag} {input_pdb}"
         f" -o {outputs[0]}"
         f" -U nphs_lps_waters"

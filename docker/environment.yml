@@ -12,4 +12,4 @@ dependencies:
    - vmd
 
    - pip:
-      - -e .[dev]
+        - -e ..[dev]

@@ -36,6 +36,52 @@ def run(
     search_space = pd.read_csv(smi_file_name_ligand)
     search_space = search_space[['TITLE', 'SMILES']]
 
+    while len(futures) < 5:
+        selected = search_space.sample(1).iloc[0]
+        _, smiles = selected['TITLE'], selected['SMILES']
+
+        # workflow
+        fname = uuid.uuid4().hex
+
+        smi_future = parsl_smi_to_pdb(
+            smiles, outputs=[PFile('%s.pdb' % fname)]
+        )
+        element_future = parsl_set_element(
+            smi_future.outputs[0], outputs=[PFile('%s-coords.pdb' % fname)]
+        )
+        pdbqt_future = parsl_pdb_to_pdbqt(
+            element_future.outputs[0],
+            outputs=[PFile('%s-coords.pdbqt' % fname)],
+        )
+        config_future = parsl_make_autodock_config(
+            PFile(receptor),
+            pdbqt_future.outputs[0],
+            '%s-out.pdb' % fname,
+            outputs=[PFile('%s-config.txt' % fname)],
+        )
+        dock_future = parsl_autodock_vina(config_future.outputs[0], smiles)
+        cleanup(
+            dock_future,
+            smi_future.outputs[0],
+            element_future.outputs[0],
+            pdbqt_future.outputs[0],
+            config_future.outputs[0],
+            PFile('%s-out.pdb' % fname),
+        )
+
+        futures.append(dock_future)
+
+    while len(futures) > 0:
+        future = next(as_completed(futures))
+        smiles, score = future.result()
+        futures.remove(future)
+
+        print(f'Computation for {smiles} succeeded: {score}')
+
+        train_data.append(
+            {'smiles': smiles, 'score': score, 'time': monotonic()}
+        )
+
     training_df = pd.DataFrame(train_data)
     m = train_model(training_df)
     predictions = run_model(m, search_space['SMILES'])
@@ -182,7 +228,8 @@ def main():
     )
 
     parser.add_argument(
-        '-b' '--batch-size',
+        '-b',
+        '--batch-size',
         type=int,
         default=3,
         help='Number of SMILES strings to simulate within a batch',
@@ -209,7 +256,7 @@ def main():
         '--max-workers',
         type=int,
         default=4,
-        help='Maximum number of Parsl workers',
+        help='Maximum number of Parsl workers per node',
     )
     args = parser.parse_args()
 
@@ -218,7 +265,7 @@ def main():
     config = Config(
         executors=[
             HighThroughputExecutor(
-                max_workers=args.max_workers,
+                max_workers_per_node=args.max_workers,
                 cpu_affinity='block',
             )
         ]
