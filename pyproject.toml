@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ParslDock"
+version = "1.0.0"
+requires-python = ">=3.10"
+authors = [
+  {name = "Kyle Chard", email = "chard@uchicago.edu"},
+  {name = "Johnny Raicu"},
+  {name = "Valerie Hayot-Sasson", email = "vhayot@uchicago.edu"},
+]
+maintainers = [
+  {name = "Kyle Chard", email = "chard@uchicago.edu"},
+  {name = "Valerie Hayot-Sasson", email = "vhayot@uchicago.edu"},
+]
+
+description = "Parallelized Protein Docking with ML-in-the-loop using Parsl"
+readme = "README.md"
+license = "MIT"
+keywords = ["protein docking", "Parsl"]
+classifiers = [
+  "Programming Language :: Python"
+]
+
+dependencies = [
+    "rdkit",
+    "scikit-learn",
+    "pandas",
+    "matplotlib",
+    "parsl"
+]
+
+[project.optional-dependencies]
+dev = ["tox"]
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
