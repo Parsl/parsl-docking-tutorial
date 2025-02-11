@@ -13,7 +13,7 @@ def compute_morgan_fingerprints(
     smiles: str, fingerprint_length: int, fingerprint_radius: int
 ):
     from rdkit import Chem, DataStructs
-    from rdkit.Chem import AllChem
+    from rdkit.Chem import rdFingerprintGenerator
 
     """Get Morgan Fingerprint of a specific SMILES string.
     Adapted from: <https://github.com/google-research/google-research/blob/
@@ -29,9 +29,10 @@ def compute_morgan_fingerprints(
     molecule = Chem.MolFromSmiles(smiles)
 
     # Compute the fingerprint
-    fingerprint = AllChem.GetMorganFingerprintAsBitVect(
-        molecule, fingerprint_radius, fingerprint_length
+    mfpgen = rdFingerprintGenerator.GetMorganGenerator(
+        radius=fingerprint_radius, fpSize=fingerprint_length
     )
+    fingerprint = mfpgen.GetFingerprint(molecule)
     arr = np.zeros((1,), dtype=bool)
 
     # ConvertToNumpyArray takes ~ 0.19 ms, while

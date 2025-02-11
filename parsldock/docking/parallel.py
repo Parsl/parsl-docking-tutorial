@@ -5,18 +5,19 @@ from parsl import python_app
 
 
 @python_app
-def parsl_smi_to_pdb(smiles: str, pdb_file: str) -> bool:
+def parsl_smi_to_pdb(smiles: str, outputs: list[str] = []) -> bool:
     from parsldock.docking.sequential import smi_txt_to_pdb
 
-    smi_txt_to_pdb(smiles=smiles, pdb_file=pdb_file)
+    smi_txt_to_pdb(smiles=smiles, pdb_file=outputs[0].filepath)
     return True
 
 
 @bash_app
-def parsl_set_element(input_pdb: str, outputs: list = []) -> str:
-    tcl_script = 'set_element.tcl'
+def parsl_set_element(input_pdb: str, outputs: list[str] = []) -> str:
+    tcl_script = 'scripts/set_element.tcl'
     command = (
-        f'vmd -dispdev text -e {tcl_script} -args {input_pdb} {outputs[0]}'
+        f'vmd -dispdev text -e {tcl_script}'
+        f'-args {input_pdb} {outputs[0].filepath}'
     )
     return command
 
