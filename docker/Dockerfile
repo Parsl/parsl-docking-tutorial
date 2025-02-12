@@ -8,4 +8,4 @@ WORKDIR /parsldock
 RUN conda env create --file docker/environment.yml
 RUN conda update -c defaults jupyter -y
 
-ENV MGLTOOLS_HOME /opt/conda/envs/parsldockenv
+ENV MGLTOOLS_HOME=/opt/conda/envs/parsldockenv
