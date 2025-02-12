@@ -46,10 +46,10 @@ def parsl_pdb_to_pdbqt(
 
     command = (
         f"{'python2.7'}"
-        f" {script_path}"
-        f" -{flag} {input_pdb}"
-        f" -o {outputs[0]}"
-        f" -U nphs_lps_waters"
+        f' {script_path}'
+        f' -{flag} {input_pdb}'
+        f' -o {outputs[0]}'
+        f' -U nphs_lps_waters'
     )
     return command
 
@@ -58,7 +58,7 @@ def parsl_pdb_to_pdbqt(
 def parsl_make_autodock_config(
     input_receptor: str,
     input_ligand: str,
-    output_pdbq: str,
+    output_pdbqt: str,
     outputs: list[str] = [],
     center: tuple[float, float, float] = (15.614, 53.380, 15.455),
     size: tuple[int, int, int] = (20, 20, 20),
@@ -72,7 +72,7 @@ def parsl_make_autodock_config(
         input_receptor_pdbqt_file=input_receptor,
         input_ligand_pdbqt_file=input_ligand,
         output_conf_file=outputs[0].filepath,
-        output_ligand_pdbqt_file=output_pdbq,
+        output_ligand_pdbqt_file=output_pdbqt,
         center=center,
         size=size,
         exhaustiveness=exhaustiveness,

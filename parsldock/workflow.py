@@ -208,7 +208,7 @@ def run(
     return training_df
 
 
-def main():
+def main():  # pragma: no cover
     parser = argparse.ArgumentParser(
         prog='ParslDock',
         description='Distributed protein docking with Parsl',
@@ -284,5 +284,5 @@ def main():
     )
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     main()
