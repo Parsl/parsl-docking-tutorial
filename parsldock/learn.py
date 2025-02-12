@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from concurrent.futures import ProcessPoolExecutor
 
-import numpy as np
+import numpy
+import pandas
+from numpy.typing import NDArray
 from sklearn.base import BaseEstimator
 from sklearn.base import TransformerMixin
+from sklearn.pipeline import Pipeline
 
 _pool = ProcessPoolExecutor(max_workers=1)
 
@@ -33,7 +36,7 @@ def compute_morgan_fingerprints(
         radius=fingerprint_radius, fpSize=fingerprint_length
     )
     fingerprint = mfpgen.GetFingerprint(molecule)
-    arr = np.zeros((1,), dtype=bool)
+    arr = numpy.zeros((1,), dtype=bool)
 
     # ConvertToNumpyArray takes ~ 0.19 ms, while
     # np.asarray takes ~ 4.69 ms
@@ -48,10 +51,18 @@ class MorganFingerprintTransformer(BaseEstimator, TransformerMixin):
         self.length = length
         self.radius = radius
 
-    def fit(self, X, y=None):
+    def fit(
+        self,
+        X: list[str],  # noqa: N803
+        y: NDArray[numpy.bool] | None = None,
+    ) -> MorganFingerprintTransformer:
         return self  # Do need to do anything
 
-    def transform(self, X, y=None):
+    def transform(
+        self,
+        X: list[str],  # noqa: N803
+        y: NDArray[numpy.bool] | None = None,
+    ) -> list[NDArray[numpy.bool]]:
         """Compute the fingerprints
 
         Args:
@@ -69,14 +80,14 @@ class MorganFingerprintTransformer(BaseEstimator, TransformerMixin):
         return fps
 
 
-def train_model(training_data):
+def train_model(training_data: pandas.DataFrame) -> Pipeline:
     """Train a machine learning model using Morgan Fingerprints.
 
     Args:
         train_data: Dataframe with a 'smiles' and 'score' column
             that contains molecule structure and docking score, respectfully.
     Returns:
-        A trained model
+        A trained model.
     """
 
     from sklearn.neighbors import KNeighborsRegressor
@@ -100,7 +111,7 @@ def train_model(training_data):
     return model.fit(training_data['smiles'], training_data['score'])
 
 
-def run_model(model, smiles):
+def run_model(model: Pipeline, smiles: list[str]) -> pandas.DataFrame:
     """Run a model on a list of smiles strings
 
     Args:

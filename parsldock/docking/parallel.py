@@ -6,6 +6,19 @@ from parsl import python_app
 
 @python_app
 def parsl_smi_to_pdb(smiles: str, outputs: list[str] = []) -> bool:
+    """Convert SMILES string to PDB representation.
+
+    The conversion to PDB file will contain atomic coordinates
+    that will be used for docking.
+
+    Args:
+        smiles: Molecule representation in SMILES format.
+        outputs: A list containing the Path of the PDB
+            file to create.
+
+    Returns:
+        True to indicate that the operation was successful.
+    """
     from parsldock.docking.sequential import smi_txt_to_pdb
 
     smi_txt_to_pdb(smiles=smiles, pdb_file=outputs[0].filepath)
@@ -14,6 +27,16 @@ def parsl_smi_to_pdb(smiles: str, outputs: list[str] = []) -> bool:
 
 @bash_app
 def parsl_set_element(input_pdb: str, outputs: list[str] = []) -> str:
+    """Add coordinated to the PDB file using VMD.
+
+    Args:
+        input_pdb: Path of input PDB file.
+        outputs: list containing path to PDB file with atomic coordinates.
+
+    Returns:
+        The command execution output.
+    """
+
     tcl_script = 'scripts/set_element.tcl'
     command = (
         f'vmd -dispdev text -e {tcl_script}'
@@ -26,6 +49,20 @@ def parsl_set_element(input_pdb: str, outputs: list[str] = []) -> str:
 def parsl_pdb_to_pdbqt(
     input_pdb: str, outputs: list[str] = [], ligand: bool = True
 ):
+    """Convert PDB file to PDBQT format.
+
+    PDBQT files are similar to the PDB format, but also includes connectivity
+    information.
+
+    Args:
+        input_pdb: input PDB file to convert.
+        outputs: list containing output converted PDBQT file.
+        ligand: If the molecule is a ligand or not.
+
+    Returns:
+        Command execution output.
+    """
+
     import os
     from pathlib import Path
 
@@ -65,7 +102,28 @@ def parsl_make_autodock_config(
     exhaustiveness: int = 1,
     num_modes: int = 20,
     energy_range: int = 10,
-):
+) -> bool:
+    """Create configuration for AutoDock Vina.
+
+    Create a configuration file for AutoDock Vina by describing
+    the target receptor and setting coordinate bounds for the
+    docking experiment.
+
+    Args:
+        input_receptor: Target receptor PDBQT file.
+        input_ligand: Target ligand PDBQT file.
+        output_pdbqt: Output ligand PDBQT file path.
+        outputs: List containing the generated Vina conf file.
+        center: Center coordinates.
+        size: Size of the search space.
+        exhaustiveness: Number of monte carlo simulations.
+        num_modes: Number of binding modes.
+        energy_range: Maximum energy difference between
+            the best binding mode and the worst one displayed (kcal/mol).
+
+    Returns:
+        True to indicate successful execution
+    """
     from parsldock.docking.sequential import make_autodock_vina_config
 
     make_autodock_vina_config(
@@ -84,7 +142,24 @@ def parsl_make_autodock_config(
 
 
 @python_app
-def parsl_autodock_vina(input_config, smiles, num_cpu=1):
+def parsl_autodock_vina(
+    input_config: str, smiles: str, num_cpu: int = 1
+) -> tuple[str, float] | str:
+    """Compute the docking score.
+
+    The docking score captures the potential energy change when the protein
+    and ligand are docked. A strong binding is represented by a negative score,
+    weaker (or no) binders are represented by positive scores.
+
+    Args:
+        input_config: Vina configuration file.
+        smiles: The SMILES string of molecule.
+        num_cpu: Number of CPUs to use.
+
+    Returns:
+        A tuple containing the SMILES string and score or None to
+            indicate error.
+    """
     import subprocess
 
     autodock_vina_exe = 'vina'
@@ -109,13 +184,31 @@ def parsl_autodock_vina(input_config, smiles, num_cpu=1):
 
 
 @python_app
-def cleanup(dock_future, pdb, pdb_coords, pdb_qt, autodoc_config, docking):
+def cleanup(
+    dock_future: str,
+    pdb: str,
+    pdb_coords: str,
+    pdb_qt: str,
+    autodock_config: str,
+    docking: str,
+) -> str:
+    """Cleanup all generated files.
+
+    Args:
+        dock_future: The output of the Autodock Vina execution.
+            Used to link steps together.
+        pdb: Pdb file generated from the SMILES string.
+        pdb_coords: Pdb file with coordinated attached.
+        pdb_qt: Pdbqt file generated from the pdb_coords file.
+        autodock_config: Config file used to run Autodock-Vina.
+        docking: Autodock-Vina output ligand pdbqt file.
+    """
     import os
 
     os.remove(pdb)
     os.remove(pdb_coords)
     os.remove(pdb_qt)
-    os.remove(autodoc_config)
+    os.remove(autodock_config)
     os.remove(docking)
 
     return dock_future

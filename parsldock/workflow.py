@@ -28,6 +28,15 @@ def run(
     num_loops: int,
     batch_size: int,
 ) -> None:
+    """Protein docking with Parsl application.
+
+    Args:
+        smi_file_name_ligand: Path to ligand SMILES string.
+        receptor: Path to target receptor PDBQT file.
+        initial_count: Initial number of simulations to perform.
+        num_loops: Number of infer-simulate-train loops to perform.
+        batch_size: Number of simulations per iteration.
+    """
     futures = []
     train_data = []
 
