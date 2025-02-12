@@ -205,6 +205,8 @@ def run(
             (training_df, pd.DataFrame(train_data)), ignore_index=True
         )
 
+    return training_df
+
 
 def main():
     parser = argparse.ArgumentParser(
