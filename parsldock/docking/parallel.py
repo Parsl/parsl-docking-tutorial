@@ -17,7 +17,7 @@ def parsl_set_element(input_pdb: str, outputs: list[str] = []) -> str:
     tcl_script = 'scripts/set_element.tcl'
     command = (
         f'vmd -dispdev text -e {tcl_script}'
-        f'-args {input_pdb} {outputs[0].filepath}'
+        f' -args {input_pdb} {outputs[0].filepath}'
     )
     return command
 

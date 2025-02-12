@@ -28,10 +28,10 @@ def smi_txt_to_pdb(smiles, pdb_file):
 
 
 def set_element(input_pdb_file, output_pdb_file):
-    tcl_script = 'set_element.tcl'
+    tcl_script = 'scripts/set_element.tcl'
     command = (
         f'vmd -dispdev text -e {tcl_script}'
-        f'print -args {input_pdb_file} {output_pdb_file}'
+        f' -args {input_pdb_file} {output_pdb_file}'
     )
 
     result = subprocess.check_output(command.split())
