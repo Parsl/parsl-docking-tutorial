@@ -35,6 +35,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["tox"]
 
+[project.scripts]
+parsldock = "parsldock.workflow:main"
+
 [tool.ruff]
 line-length = 79
 

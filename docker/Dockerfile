@@ -9,3 +9,5 @@ RUN conda env create --file docker/environment.yml
 RUN conda update -c defaults jupyter -y
 
 ENV MGLTOOLS_HOME=/opt/conda/envs/parsldockenv
+
+ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "parsldockenv", "parsldock"]
